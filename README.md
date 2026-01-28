@@ -22,7 +22,7 @@ Instead of “guessing,” the API first **retrieves the most relevant resume ch
 
 ## How to run locally
 1) Start Postgres:
-
+```bash
 docker compose up -d
 Configure DB in src/main/resources/application.yml
 
@@ -51,5 +51,3 @@ ingest/ResumeChunker.java — section + context-aware chunking
 chat/ResumeChatService.java — retrieval + response assembly
 
 db/migration/V1__init.sql — schema + indexes (FTS + trigram)
-
-```bash
