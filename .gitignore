@@ -1,0 +1,27 @@
+cat > .gitignore << 'EOF'
+# Java / Spring
+target/
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+*.env
+application-local.yml
+application-local.yaml
+
+# Gradle/Maven wrappers (keep wrappers, ignore build caches)
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Misc
+out/
+EOF

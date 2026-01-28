@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/resume_db
+    username: resume
+    password: resume
+
+  flyway:
+    enabled: true
+    validate-migration-naming: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  ingest: false
+logging:
+  level:
+    org.springframework.jdbc.core: DEBUG
+

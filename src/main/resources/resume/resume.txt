@@ -1,0 +1,71 @@
+
+
+
+
+Akshith Macharla
+Phone: (530) 965-7864 | Email: amacharla@csuchico.edu
+ | Location: Chico, CA | LinkedIn: https://www.linkedin.com/in/akshith-macharla-/ | GitHub: https://github.com/amacharla15
+
+EDUCATION
+California State University, Chico, CA
+M.S. Computer Science | Expected: May 2027 | GPA: 4.0/4.0
+Courses: Data Structures and Algorithms (C++), Software Design, Machine Learning, Computer Vision, Operating Systems (C++)
+
+SKILLS
+Languages: Python, Java, C++, TypeScript
+Frameworks/Libraries: Spring Boot, FastAPI, Django, React, PyTorch, TensorFlow/Keras, Pandas, NumPy, LangChain
+Data/Cloud/DevOps: PostgreSQL, MySQL, Redis, RabbitMQ, Kafka, Spark, AWS, GCP, Docker, CI/CD
+Concepts/Testing: Distributed Systems, REST APIs, Prometheus, Grafana, OOP, Pytest, Django TestCase, JUnit
+
+EXPERIENCE
+California State University, Chico - Web Developer (Nov 2025 - Present) - Chico, CA
+
+CSU Chico: Owned and shipped the Chico Love event website end-to-end (landing pages, registration UX, backend integration).
+
+CSU Chico: Implemented a registration backend on Cloudflare Workers + D1 with schema/index design, validation, and idempotent email uniqueness.
+
+CSU Chico: Standardized a reproducible Wrangler workflow (local testing, schema apply, deploy, verification) to improve release reliability.
+
+Cognizant Technology Solutions - Associate Software Engineer (Dec 2021 - Aug 2024) - Hyderabad, India
+
+Cognizant: Built and maintained Java Spring Boot microservices for insurance claims and policy workflows for 10,000+ active users; improved API responsiveness via DB query optimization and payload tuning validated in Dynatrace.
+
+Cognizant: Owned AWS production support and releases; monitored via Dynatrace, triaged and resolved 100+ incidents (auth, login, registration, integrations), and sustained 99.9% uptime.
+
+Cognizant: Improved delivery quality with JUnit/Mockito tests and documentation, reducing onboarding time for new engineers.
+
+Edureka - Data Science and Machine Learning Intern (Jan 2023 - Jul 2023) - Hyderabad, India
+
+Edureka: Cleaned and prepared 1.3M rows (missing values, outliers, encodings) in a reproducible Pandas + SQL pipeline.
+
+Edureka: Trained an Elastic Net logistic regression model with temporal validation; improved ROC-AUC and optimized the decision threshold to increase minority-class recall while tracking precision/recall tradeoffs.
+
+PROJECTS
+Hardware-Aware Training Time and Throughput Prediction (TensorFlow/Keras, NVIDIA A100, CIFAR-10) - Nov 2025
+
+A100 CNN Predictor: Built a benchmark dataset across 143 CNN configs; logged sec/epoch, images/sec, params, accuracy with reproducible scripts + aggregation over repeats.
+
+A100 CNN Predictor: Trained an ANN with linear baselines to predict sec/epoch using log-target modeling (R^2 = 0.994); derived throughput as 50,000 / predicted sec-per-epoch; validated on unseen configs (MAE = 0.10 sec/epoch, ~1.5k images/sec).
+
+A100 CNN Predictor: Released a CLI-style predictor to estimate runtime and throughput for new CNN configs.
+
+RAGOps Copilot (LangChain, LangGraph, Gemini API, Qdrant, FastAPI, Next.js) - Nov 2025 to Dec 2025
+
+RAGOps Copilot: Built a developer RAG copilot over code/docs with auditable citations and traceable answers.
+
+RAGOps Copilot: Implemented a LangGraph tool-calling workflow to draft and create GitHub issues via API; added request logging for p95 latency, token usage, and estimated cost.
+
+Task Platform - Distributed Job Queue (FastAPI, RabbitMQ, Postgres, Redis, Prometheus, Grafana, Docker) - Dec 2025
+
+Task Platform: Built a Dockerized async task platform with idempotency-key deduplication, at-least-once processing, retries, and DLQ handling.
+
+Task Platform: Load tested 2,000 tasks; measured worker throughput improvement from 31.25 tasks/sec (1 worker) to 41.7 tasks/sec (3 workers), a 33% gain; added Prometheus/Grafana dashboards.
+
+University Marketplace (Django, PostgreSQL, Docker, GCP, Bootstrap) - Jan 2025 to May 2025
+
+University Marketplace: Built a containerized backend with Django + PostgreSQL; deployed across multiple GCP VMs behind an HTTPS Load Balancer for high availability; used GCP Storage Buckets for secure image hosting; exposed a server_info endpoint for real-time environment/config visibility.
+
+CERTIFICATIONS
+AWS Certified Developer - Associate
+AWS Machine Learning Foundations
+Udacity - Introducing Generative AI with AWS
