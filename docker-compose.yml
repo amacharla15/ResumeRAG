@@ -1,14 +1,20 @@
 services:
   db:
-    image: pgvector/pgvector:pg16
+    image: postgres:16
     container_name: resume_pg
     environment:
+      POSTGRES_DB: resume_db
       POSTGRES_USER: resume
       POSTGRES_PASSWORD: resume
-      POSTGRES_DB: resume_db
     ports:
       - "5432:5432"
     volumes:
       - resume_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resume -d resume_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
 volumes:
   resume_pg_data:
