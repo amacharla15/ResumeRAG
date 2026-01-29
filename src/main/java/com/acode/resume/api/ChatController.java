@@ -16,7 +16,8 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ChatResponse chat(@Valid @RequestBody ChatRequest req) throws Exception {
-        ResumeChatService.Result r = service.answer(req.message);
-        return new ChatResponse(r.canAnswer, r.answer, r.citations, r.usedFields);
+        boolean debug = req.debug;
+        ResumeChatService.Result r = service.answer(req.message, debug);
+        return new ChatResponse(r.canAnswer, r.answer, r.citations, r.usedFields, r.debugHits);
     }
 }

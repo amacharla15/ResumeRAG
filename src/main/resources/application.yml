@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/resume_db
-    username: resume
-    password: resume
+    url: ${RESUME_DB_URL:jdbc:postgresql://localhost:5432/resume_db}
+    username: ${RESUME_DB_USER:resume}
+    password: ${RESUME_DB_PASSWORD:resume}
 
   flyway:
     enabled: true
@@ -16,7 +16,7 @@ management:
 
 app:
   ingest: false
+
 logging:
   level:
-    org.springframework.jdbc.core: DEBUG
-
+    org.springframework.jdbc.core: INFO

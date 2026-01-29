@@ -31,7 +31,17 @@ public class ResumeChunker {
             if (raw == null) continue;
 
             String line = raw.trim();
-            if (line.length() == 0) continue;
+
+            boolean isContextSection = section.equals("EXPERIENCE") || section.equals("PROJECTS");
+
+            // IMPORTANT: blank line is a boundary between entries inside EXPERIENCE/PROJECTS
+            if (line.length() == 0) {
+                if (isContextSection) {
+                    ctx1 = "";
+                    ctx2 = "";
+                }
+                continue;
+            }
 
             if (isHeading(line)) {
                 section = normalizeHeading(line);
@@ -40,7 +50,7 @@ public class ResumeChunker {
                 continue;
             }
 
-            boolean isContextSection = section.equals("EXPERIENCE") || section.equals("PROJECTS");
+            isContextSection = section.equals("EXPERIENCE") || section.equals("PROJECTS");
 
             if (startsWithBullet(line)) {
                 String cleaned = stripBullet(line).trim();
@@ -58,18 +68,16 @@ public class ResumeChunker {
 
             // non-bullet line
             if (isContextSection) {
-                if (ctx1.length() == 0) ctx1 = line;
-                else if (ctx2.length() == 0) ctx2 = line;
-                else {
-                    // shift window so we keep the latest header-ish info
-                    ctx1 = ctx2;
-                    ctx2 = line;
-                }
+                // Treat any non-bullet line as the start of a new context header.
+                // This prevents context bleeding across jobs/projects.
+                ctx1 = line;
+                ctx2 = "";
+                out.add(new Chunk(section, line, "header"));
+                continue;
             }
 
             out.add(new Chunk(section, line, "line"));
         }
-
 
         return out;
     }
@@ -86,7 +94,6 @@ public class ResumeChunker {
     }
 
     private static boolean isHeading(String s) {
-        // Common resume headings
         String u = s.toUpperCase();
         if (u.equals("EDUCATION")) return true;
         if (u.equals("SKILLS")) return true;
@@ -94,10 +101,8 @@ public class ResumeChunker {
         if (u.equals("PROJECTS")) return true;
         if (u.equals("CERTIFICATIONS")) return true;
 
-        // Also treat "HEADING:" as heading
         if (s.endsWith(":") && s.length() <= 40) return true;
 
-        // All-caps short line (safe-ish)
         boolean hasLetter = false;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);

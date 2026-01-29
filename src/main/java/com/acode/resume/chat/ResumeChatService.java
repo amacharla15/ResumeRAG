@@ -1,6 +1,7 @@
 package com.acode.resume.chat;
 
 import com.acode.resume.api.Citation;
+import com.acode.resume.api.RetrievalHit;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,37 +26,45 @@ public class ResumeChatService {
         public final String answer;
         public final List<Citation> citations;
         public final List<String> usedFields;
+        public final List<RetrievalHit> debugHits;
 
-        public Result(boolean canAnswer, String answer, List<Citation> citations, List<String> usedFields) {
+        public Result(boolean canAnswer, String answer, List<Citation> citations, List<String> usedFields, List<RetrievalHit> debugHits) {
             this.canAnswer = canAnswer;
             this.answer = answer;
             this.citations = citations;
             this.usedFields = usedFields;
+            this.debugHits = debugHits;
         }
     }
 
+    // Backward compatible
     public Result answer(String message) throws Exception {
+        return answer(message, false);
+    }
+
+    public Result answer(String message, boolean debug) throws Exception {
         String q = message == null ? "" : message.trim();
         if (q.length() == 0) {
-            return new Result(false, "Ask a question about the resume.", new ArrayList<>(), new ArrayList<>());
+            return new Result(false, "Ask a question about the resume.", new ArrayList<>(), new ArrayList<>(), debug ? new ArrayList<>() : null);
         }
 
         // 1) Fact routing (no model)
         FactMatch fm = matchFact(q);
         if (fm.matched) {
-            return answerFromProfileJson(fm);
+            Result r = answerFromProfileJson(fm);
+            if (!debug) return r;
+            return new Result(r.canAnswer, r.answer, r.citations, r.usedFields, new ArrayList<>());
         }
 
         // 2) Narrative routing (search chunks + citations)
         List<Row> rows = searchChunks(q, 6);
 
         if (rows.size() == 0) {
-            return new Result(false, "I don’t have that information in my resume.", new ArrayList<>(), new ArrayList<>());
+            return new Result(false, "I don’t have that information in my resume.", new ArrayList<>(), new ArrayList<>(), debug ? new ArrayList<>() : null);
         }
 
-        // Build extractive answer: join top snippets (safe, no hallucination)
         StringBuilder sb = new StringBuilder();
-        List<Citation> cites = new ArrayList<Citation>();
+        List<Citation> cites = new ArrayList<>();
 
         for (int i = 0; i < rows.size(); i++) {
             Row r = rows.get(i);
@@ -64,16 +73,25 @@ public class ResumeChatService {
             cites.add(new Citation(r.id, r.section, snip));
         }
 
-        String answer = sb.toString().trim();
-        return new Result(true, answer, cites, new ArrayList<>());
+        List<RetrievalHit> dbg = null;
+        if (debug) {
+            dbg = new ArrayList<>();
+            for (int i = 0; i < rows.size(); i++) {
+                Row r = rows.get(i);
+                dbg.add(new RetrievalHit(r.id, r.section, r.method, r.score, clip(r.content, 180)));
+            }
+        }
+
+        return new Result(true, sb.toString().trim(), cites, new ArrayList<>(), dbg);
     }
 
     // ---------------- Fact handling ----------------
 
     private static class FactMatch {
         public boolean matched;
-        public String fieldPath;     // e.g. "name" or "skills.languages"
-        public String label;         // for usedFields
+        public String fieldPath;
+        public String label;
+
         public FactMatch(boolean matched, String fieldPath, String label) {
             this.matched = matched;
             this.fieldPath = fieldPath;
@@ -84,27 +102,35 @@ public class ResumeChatService {
     private FactMatch matchFact(String q) {
         String s = q.toLowerCase();
 
-        if (containsAny(s, "name", "who are you", "who is this resume")) return new FactMatch(true, "name", "name");
-        if (containsAny(s, "email", "mail id")) return new FactMatch(true, "email", "email");
-        if (containsAny(s, "phone", "number", "contact")) return new FactMatch(true, "phone", "phone");
-        if (containsAny(s, "location", "where", "based")) return new FactMatch(true, "location", "location");
+        // Make this precise: avoid greedy words like "where" or "number"
+        if (containsAny(s, "who are you", "who is this resume", "your name", "name?")) return new FactMatch(true, "name", "name");
+        if (containsAny(s, "email", "email id", "mail id")) return new FactMatch(true, "email", "email");
+        if (containsAny(s, "phone number", "contact number", "your phone")) return new FactMatch(true, "phone", "phone");
+
+        if (containsAny(s, "where are you based", "based in", "your location", "location")) return new FactMatch(true, "location", "location");
+
         if (containsAny(s, "gpa")) return new FactMatch(true, "education[0].gpa", "education.gpa");
-        if (containsAny(s, "graduation", "grad", "may 2027")) return new FactMatch(true, "education[0].grad", "education.grad");
+        if (containsAny(s, "graduation", "expected may", "may 2027")) return new FactMatch(true, "education[0].grad", "education.grad");
+
         if (containsAny(s, "languages")) return new FactMatch(true, "skills.languages", "skills.languages");
-        if (containsAny(s, "framework", "frameworks")) return new FactMatch(true, "skills.frameworks", "skills.frameworks");
-        if (containsAny(s, "databases", "infra", "cloud")) return new FactMatch(true, "skills.infra", "skills.infra");
+        if (containsAny(s, "frameworks", "libraries")) return new FactMatch(true, "skills.frameworks", "skills.frameworks");
+        if (containsAny(s, "databases", "cloud", "devops", "infra")) return new FactMatch(true, "skills.infra", "skills.infra");
+
         if (containsAny(s, "certification", "certifications")) return new FactMatch(true, "certifications", "certifications");
 
         return new FactMatch(false, "", "");
     }
 
     private Result answerFromProfileJson(FactMatch fm) throws Exception {
-        String json = jdbcTemplate.queryForObject("SELECT profile_json::text FROM resume_profile ORDER BY id DESC LIMIT 1", String.class);
+        String json = jdbcTemplate.queryForObject(
+                "SELECT profile_json::text FROM resume_profile ORDER BY id DESC LIMIT 1",
+                String.class
+        );
         JsonNode root = objectMapper.readTree(json);
 
         JsonNode value = getByPath(root, fm.fieldPath);
         if (value == null || value.isMissingNode() || value.isNull()) {
-            return new Result(false, "I don’t have that information in my resume.", new ArrayList<>(), List.of(fm.label));
+            return new Result(false, "I don’t have that information in my resume.", new ArrayList<>(), List.of(fm.label), null);
         }
 
         String answer;
@@ -118,11 +144,10 @@ public class ResumeChatService {
             answer = value.asText();
         }
 
-        return new Result(true, answer, new ArrayList<>(), List.of(fm.label));
+        return new Result(true, answer, new ArrayList<>(), List.of(fm.label), null);
     }
 
     private JsonNode getByPath(JsonNode root, String path) {
-        // supports: a.b , a[0].b
         String[] parts = path.split("\\.");
         JsonNode cur = root;
 
@@ -161,12 +186,14 @@ public class ResumeChatService {
         public final String section;
         public final String content;
         public final double score;
+        public final String method; // "fts" or "trgm"
 
-        public Row(long id, String section, String content, double score) {
+        public Row(long id, String section, String content, double score, String method) {
             this.id = id;
             this.section = section;
             this.content = content;
             this.score = score;
+            this.method = method;
         }
     }
 
@@ -181,11 +208,22 @@ public class ResumeChatService {
 
         List<Row> a = jdbcTemplate.query(
                 sql1,
-                (rs, rowNum) -> new Row(rs.getLong("id"), rs.getString("section"), rs.getString("content"), rs.getDouble("score")),
+                (rs, rowNum) -> new Row(
+                        rs.getLong("id"),
+                        rs.getString("section"),
+                        rs.getString("content"),
+                        rs.getDouble("score"),
+                        "fts"
+                ),
                 q, q, limit
         );
 
-        if (a.size() >= 2) return a;
+        // FIX: if we found anything with FTS, use it (don’t require >=2)
+        if (a.size() > 0) {
+            // light gate to avoid junk, tune later
+            if (a.get(0).score < 0.05) return new ArrayList<>();
+            return a;
+        }
 
         // 2) Fuzzy fallback (trigram similarity)
         String sql2 =
@@ -197,16 +235,19 @@ public class ResumeChatService {
 
         List<Row> b = jdbcTemplate.query(
                 sql2,
-                (rs, rowNum) -> new Row(rs.getLong("id"), rs.getString("section"), rs.getString("content"), rs.getDouble("score")),
+                (rs, rowNum) -> new Row(
+                        rs.getLong("id"),
+                        rs.getString("section"),
+                        rs.getString("content"),
+                        rs.getDouble("score"),
+                        "trgm"
+                ),
                 q, q, limit
         );
 
-        // Hard gate: if even fuzzy scores are weak, refuse
-        List<Row> out = new ArrayList<Row>();
+        List<Row> out = new ArrayList<>();
         for (int i = 0; i < b.size(); i++) {
-            if (b.get(i).score >= 0.15) { // simple threshold; adjust later
-                out.add(b.get(i));
-            }
+            if (b.get(i).score >= 0.15) out.add(b.get(i));
         }
         return out;
     }

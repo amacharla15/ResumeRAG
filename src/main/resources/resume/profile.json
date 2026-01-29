@@ -1,11 +1,11 @@
 {
   "name": "Akshith Macharla",
-  "phone": "(530)9657864",
+  "phone": "(530) 965-7864",
   "email": "amacharla@csuchico.edu",
   "location": "Chico, CA",
   "links": {
-    "linkedin": "Linkedin",
-    "github": "github"
+    "linkedin": "https://www.linkedin.com/in/akshith-macharla-/",
+    "github": "https://github.com/amacharla15"
   },
   "education": [
     {
@@ -14,19 +14,19 @@
       "grad": "May 2027",
       "gpa": "4.0/4.0",
       "courses": [
-        "Data Structures and Algorithms - C++",
+        "Data Structures and Algorithms (C++)",
         "Software Design",
         "Machine Learning",
         "Computer Vision",
-        "Operating Systems - C++"
+        "Operating Systems (C++)"
       ]
     }
   ],
   "skills": {
-    "languages": ["Python", "Java", "C++", "Typescript"],
-    "frameworks": ["SpringBoot", "FastAPI", "Django", "React", "Pytorch", "TensorFlow", "Keras", "Pandas", "Numpy", "LangChain", "Tableau", "PowerBI"],
-    "infra": ["PostgreSQL", "MySQL", "Redis", "RabbitMQ", "AWS", "GCP", "Docker", "CI/CD", "Kafka", "Spark"],
-    "concepts": ["Distributed Systems", "Rest APIs", "Prometheus", "Grafana", "OOP", "Pytest", "Django Testcase", "JUnit"]
+    "languages": ["Python", "Java", "C++", "TypeScript"],
+    "frameworks": ["Spring Boot", "FastAPI", "Django", "React", "PyTorch", "TensorFlow", "Keras", "Pandas", "NumPy", "LangChain"],
+    "infra": ["PostgreSQL", "MySQL", "Redis", "RabbitMQ", "Kafka", "Spark", "AWS", "GCP", "Docker", "CI/CD"],
+    "concepts": ["Distributed Systems", "REST APIs", "Prometheus", "Grafana", "OOP", "Pytest", "Django TestCase", "JUnit"]
   },
   "experience": [
     {
@@ -48,12 +48,12 @@
       "location": "Hyderabad, India",
       "title": "Data Science and Machine Learning Intern",
       "start": "Jan 2023",
-      "end": "July 2023"
+      "end": "Jul 2023"
     }
   ],
   "certifications": [
-    "AWS certified Developer Associate",
+    "AWS Certified Developer - Associate",
     "AWS Machine Learning Foundations",
-    "Udacity’s Introducing Generative AI with AWS"
+    "Udacity - Introducing Generative AI with AWS"
   ]
 }
